@@ -1,5 +1,5 @@
 C=======================================================================
-C  OPGROW, Subroutine, G. Hoogenboom, J.W. Jones
+C  TG_OPGROW, Subroutine, G. Hoogenboom, J.W. Jones
 C-----------------------------------------------------------------------
 C  Generates output file for daily growth variables
 C-----------------------------------------------------------------------
@@ -15,7 +15,7 @@ C-----------------------------------------------------------------------
 C  Called by: PLANT
 C  Calls:     None
 !=======================================================================
-      SUBROUTINE OPGROW(CONTROL, ISWITCH, SoilProp, 
+      SUBROUTINE TG_OPGROW(CONTROL, ISWITCH, SoilProp, 
      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
      &    GRWRES, KSTRES, MAINR, MDATE, NFIXN, NLAYR, NSTRES, 
      &    PCLSD, PCCSD, PCNL, PCNRT, PCNSD, PCNSH, PCNST, PG, 
@@ -39,7 +39,7 @@ C  Calls:     None
 !-----------------------------------------------------------------------
       CHARACTER*1  IDETG, ISWPHO, ISWPOT
       CHARACTER*2  CROP
-      CHARACTER*6, PARAMETER :: ERRKEY = 'OPGROW'
+      CHARACTER*6, PARAMETER :: ERRKEY = 'TG_OPGROW'
 !      CHARACTER*8  FNAME
       CHARACTER*12 OUTG, OUTPC, OUTPN
 
@@ -76,7 +76,7 @@ C  Calls:     None
 
 !     P, K modules
       REAL PStres1, PStres2, KSTRES
-
+      REAL VCounter, VLag
 !     Temp
       REAL SENSURFT, SENSOILT
 
@@ -87,7 +87,7 @@ C  Calls:     None
       TYPE (SwitchType)  ISWITCH
       TYPE (ResidueType) SENESCE
       TYPE (SoilType)    SOILPROP
-
+      Common / VStageCount/VCounter, Vlag
 !     No output for fallow crop
       CROP    = CONTROL % CROP
       IDETG   = ISWITCH % IDETG
@@ -185,7 +185,7 @@ C  Calls:     None
           ENDDO
 
         WRITE (NOUTDG,220)
-  220   FORMAT('    SNW0C   SNW1C') !   SNW0D   SNW1D',
+  220   FORMAT('    SNW0C   SNW1C  VCount    VLag') !   SNW0D   SNW1D',
 !     &         '     EOP   TRWUP  WRDOTN')
 
 !-----------------------------------------------------------------------
@@ -387,7 +387,7 @@ C-----------------------------------------------------------------------
      &        2(1X,I6),1X,F6.1,2(1X,F6.2),1X,F6.1,1X,F6.2,11(1X,F7.2))
 
           WRITE (NOUTDG,316) 
-     &        NINT(CUMSENSURF), NINT(CUMSENSOIL)   !, SENSURFT, SENSOILT
+     &        NINT(CUMSENSURF), NINT(CUMSENSOIL), VCounter, VLag   !, SENSURFT, SENSOILT
 !     &        , EOP, TRWUP, WRDOTN
   316     FORMAT (I8,1X,I7, 2F8.3, 3F8.4)
           END IF   ! VSH
@@ -514,7 +514,7 @@ C-----------------------------------------------------------------------
       ENDIF
 !***********************************************************************
       RETURN
-      END ! SUBROUTINE OPGROW
+      END ! SUBROUTINE TG_OPGROW
 !=======================================================================
 
 

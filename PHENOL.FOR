@@ -1,5 +1,5 @@
 C=======================================================================
-C  PHENOL, Subroutine, J. W. Jones
+C  TG_PHENOL, Subroutine, J. W. Jones
 C  Calculates phenological development.
 C-----------------------------------------------------------------------
 C  REVISION HISTORY
@@ -10,16 +10,18 @@ C  07/09/1997 CHP modified for CROPGRO restructuring
 C             Added DYNAMIC variable for model control
 !  07/13/2006 CHP Added P model
 !  06/11/2007 CHP PStres2 affects growth
+!  03/14/2012 JZW Add the input argument PLME and pass to TREEGRO
+!             because TG_Canopy and TG_ROOTS need read I File when PLME = "T" 
 !  06/15/2022 CHP Added CropStatus
 C-----------------------------------------------------------------------
-!     Called from:    Main program
+!     Called from:    TREEGRO  !Main program
 !     Calls:          IPPHENOL
 !                     RSTAGES
 !                     VSTAGES
 !                     CURV
 C=======================================================================
 
-      SUBROUTINE PHENOL(CONTROL, ISWITCH, 
+      SUBROUTINE TG_PHENOL(CONTROL, ISWITCH, 
      &    DAYL, NSTRES, PStres2, SOILPROP, ST,            !Input
      &    SW, SWFAC, TGRO, TMIN, TURFAC, XPOD, YRPLT,     !Input
      &    CropStatus,                                     !Output
@@ -27,7 +29,7 @@ C=======================================================================
      &    NDSET, NR1, NR2, NR5, NR7, NVEG0, PHTHRS,       !Output
      &    RSTAGE, RVSTGE, STGDOY, SeedFrac, TDUMX,        !Output
      &    TDUMX2, VegFrac, VSTAGE, YREMRG, YRNR1,         !Output
-     &    YRNR2, YRNR3, YRNR5, YRNR7)                     !Output
+     &    YRNR2, YRNR3, YRNR5, YRNR7, PLME)               !Output
 
 !----------------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
@@ -49,7 +51,7 @@ C=======================================================================
       INTEGER DYNAMIC
       INTEGER I, J, K, NLAYR
       INTEGER NDLEAF, NDSET, NR1, NR2, NR5, NR7, NVEG0, RSTAGE
-      INTEGER YRNR1, YRNR2, YRNR3, YRNR5, YRNR7, MDATE
+      INTEGER YRNR1, YRNR2, YRNR3, YRNR5, YRNR7, MDATE, FrDrpDay
       INTEGER STGDOY(20)
       INTEGER NPRIOR(20), NVALPH(20), TSELC(20)
 
@@ -150,16 +152,16 @@ C       Number of days from flowering to harvest maturity
         FUDAY(J) = 0.
       ENDDO
 
-      CALL RSTAGES(CONTROL,
-     &    FNSTR, FPSTR, FSW, FT, FUDAY, ISIMI, NPRIOR,    !Input
-     &    PHTHRS, PLME, SDEPTH, YRDOY, YRPLT, YRSIM,      !Input
-     &    CropStatus,                                     !Output
-     &    JPEND, MDATE, NDLEAF, NDSET, NDVST, NVALPH,     !Output
-     &    NVEG0, NVEG1, NR1, NR2, NR5, NR7, PHZACC,       !Output
-     &    RSTAGE, STGDOY, SeedFrac, VegFrac, YREMRG,      !Output
-     &    YRNR1, YRNR2, YRNR3, YRNR5, YRNR7)              !Output
+      CALL TG_RSTAGES(CONTROL,
+     &    FNSTR, FPSTR, FSW, FT, FUDAY, ISIMI, NPRIOR,          !Input
+     &    PHTHRS, PLME, SDEPTH, YRDOY, YRPLT, YRSIM,            !Input
+     &    CropStatus,                                           !Output
+     &    JPEND, MDATE, FrDrpDay, NDLEAF, NDSET, NDVST, NVALPH, !Output
+     &    NVEG0, NVEG1, NR1, NR2, NR5, NR7, PHZACC,             !Output
+     &    RSTAGE, STGDOY, SeedFrac, VegFrac, YREMRG,            !Output
+     &    YRNR1, YRNR2, YRNR3, YRNR5, YRNR7)                    !Output
 
-      CALL VSTAGES(
+      CALL TG_VSTAGES(CONTROL,
      &    DAS, DTX, EVMODC, MNEMV1, NDVST,                !Input
      &    NVEG0, NVEG1, PHZACC, PLME, TRIFOL,             !Input
      &    TURFAC, XPOD, YRDOY, YRPLT,                     !Input
@@ -293,7 +295,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C    Calculate rate of V-stage change for height and width determination
 C-----------------------------------------------------------------------
-      CALL VSTAGES(
+      CALL TG_VSTAGES(CONTROL,
      &    DAS, DTX, EVMODC, MNEMV1, NDVST,                !Input
      &    NVEG0, NVEG1, PHZACC, PLME, TRIFOL,             !Input
      &    TURFAC, XPOD, YRDOY, YRPLT,                     !Input
@@ -309,14 +311,14 @@ C**********************************************************************
 C----------------------------------------------------------------------
 C     Check to see if stages occur today, if so set them in RSTAGES
 C----------------------------------------------------------------------
-      CALL RSTAGES(CONTROL,
-     &    FNSTR, FPSTR, FSW, FT, FUDAY, ISIMI, NPRIOR,    !Input
-     &    PHTHRS, PLME, SDEPTH, YRDOY, YRPLT, YRSIM,      !Input
-     &    CropStatus,                                     !Output
-     &    JPEND, MDATE, NDLEAF, NDSET, NDVST, NVALPH,     !Output
-     &    NVEG0, NVEG1, NR1, NR2, NR5, NR7, PHZACC,       !Output
-     &    RSTAGE, STGDOY, SeedFrac, VegFrac, YREMRG,      !Output
-     &    YRNR1, YRNR2, YRNR3, YRNR5, YRNR7)              !Output
+      CALL TG_RSTAGES(CONTROL,
+     &    FNSTR, FPSTR, FSW, FT, FUDAY, ISIMI, NPRIOR,           !Input
+     &    PHTHRS, PLME, SDEPTH, YRDOY, YRPLT, YRSIM,             !Input
+     &    CropStatus,                                            !Output
+     &    JPEND, MDATE, FrDrpDay, NDLEAF, NDSET, NDVST, NVALPH,  !Output
+     &    NVEG0, NVEG1, NR1, NR2, NR5, NR7, PHZACC,              !Output
+     &    RSTAGE, STGDOY, SeedFrac, VegFrac, YREMRG,             !Output
+     &    YRNR1, YRNR2, YRNR3, YRNR5, YRNR7)                     !Output
 
 C-----------------------------------------------------------------------
 C     Special accumulators used in other parts of the model
@@ -342,7 +344,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 !     Calculate V-stages
 !-----------------------------------------------------------------------
-      CALL VSTAGES(
+      CALL TG_VSTAGES(CONTROL,
      &    DAS, DTX, EVMODC, MNEMV1, NDVST,                !Input
      &    NVEG0, NVEG1, PHZACC, PLME, TRIFOL,             !Input
      &    TURFAC, XPOD, YRDOY, YRPLT,                     !Input
@@ -355,26 +357,27 @@ C***********************************************************************
       END IF
 !-----------------------------------------------------------------------
       RETURN
-      END   !SUBROUTINE PHENOL
+      END   !SUBROUTINE TG_PHENOL
 
 C-----------------------------------------------------------------------
-C     End Subroutine PHENOL
+C     End Subroutine TG_PHENOL
 C-----------------------------------------------------------------------
 
 
 
 C=======================================================================
-C  VSTAGES, Subroutine
+C  TG_VSTAGES, Subroutine
 C  Calculates V-stages
 C-----------------------------------------------------------------------
 C  REVISION HISTORY
 C  07/24/98 CHP Pulled code from PHENOL subroutine
+!  05/03/2012 JZW Add the input argument PLME for read I File when PLME = "T" 																			  
 C-----------------------------------------------------------------------
-!     Called from:    PHENOL
+!     Called from:    TG_PHENOL
 !     Calls:          None
 C=======================================================================
 
-      SUBROUTINE VSTAGES(
+      SUBROUTINE TG_VSTAGES(CONTROL,
      &    DAS, DTX, EVMODC, MNEMV1, NDVST,                !Input
      &    NVEG0, NVEG1, PHZACC, PLME, TRIFOL,             !Input
      &    TURFAC, XPOD, YRDOY, YRPLT,                     !Input
@@ -385,6 +388,7 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE Interface_Read_IFile												 
       IMPLICIT NONE
       SAVE
 
@@ -396,24 +400,46 @@ C=======================================================================
       REAL MNEMV1, TRIFOL, EVMODC, EVMOD, DTX
       REAL TURFAC, XPOD
       REAL PHZACC(20)
+      Real VCounter, Vlag, MaxNewLeaf, VDelta, VMult, MaxVLag
+      logical LAGTIME 
 
+      TYPE (ControlType) CONTROL
+      Common / VStageCount/VCounter, Vlag
+      if (YRDOY .eq. 1979063) then
+        continue
+      endif	   
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
 !***********************************************************************
       IF (DYNAMIC .EQ. SEASINIT) THEN
 !-----------------------------------------------------------------------
-      VSTAGE = 0.0
+      IF (CONTROL%RUN .EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE. 0) THEN
+       VSTAGE = 0.0
+       else 
+        VStage = 18.7 ! JZW tset 
+      Endif	   
       RVSTGE = 0.0
       VSTGED = 0.0
+      IF (CONTROL%RUN .EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE. 0) THEN
       VSTAGP = 0.0
+      endif	   
       RVSTGE = 0.0
 
+      VCounter = 0.0
+  !    MaxNewLeaf = 1.5 !f(VSTAGE, tree age, stem mass)
+      MaxVLag = 1.0 ! JZW??										   
 !***********************************************************************
 !***********************************************************************
 C     Daily Rate Calculations 
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. RATE) THEN
+       IF (CONTROL %RUN == 1 .OR. INDEX('FPQ',CONTROL%RNMODE) < 0) THEN
+         IF (PLME .EQ. 'T' .AND. YRPLT .EQ. YRDOY) ! over write initial setting
+           ! The data of I File will over write the data of *.spe 
+     &    CALL Read_IFile (CONTROL, GSTI=VSTAGE)
+          ! GSTI   Initial development stage. It is VSTAGE (i.e. DVSI)
+        endif 			   
 !-----------------------------------------------------------------------
 !    Calculate rate of V-stage change for height and width determination
 !-----------------------------------------------------------------------
@@ -451,6 +477,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
       IF (PLME .EQ. 'T' .AND. YRPLT .EQ. YRDOY) THEN
         VSTAGE = 1. + (PHZACC(2) - MNEMV1) * TRIFOL
+        MaxNewLeaf = 0.05 * VSTAGE								  
       ENDIF
 
 !-----------------------------------------------------------------------
@@ -466,7 +493,29 @@ C-----------------------------------------------------------------------
           ELSE
             EVMOD = 1.0
           ENDIF
-          VSTAGE = VSTAGE + DTX * TRIFOL * EVMOD*TURFAC*(1.0-XPOD)
+!          VSTAGE = VSTAGE + DTX * TRIFOL * EVMOD*TURFAC*(1.0-XPOD)
+          VDelta = DTX * TRIFOL * EVMOD*TURFAC*(1.0-XPOD)
+
+          IF (LAGTIME) THEN
+            VLag = VLag + VDelta  
+            VMult = 0.0
+            IF (VLag >= MaxVLag) THEN
+              LAGTIME = .FALSE.
+              VCounter = VLag - MaxVLag
+              VLag = 0.0
+            ENDIF
+          ELSE
+            VCounter = VCounter + VDelta 
+            VMult = 1.0
+            IF (VCounter >= MaxNewLeaf) THEN
+              LAGTIME = .TRUE.
+              VLag = VCounter - MaxNewLeaf 
+              VCounter = 0.0
+            ENDIF
+          ENDIF
+
+
+          VSTAGE = VSTAGE + VDelta * VMult
         ENDIF
       ENDIF
 
@@ -477,7 +526,7 @@ C-----------------------------------------------------------------------
       END IF
 !***********************************************************************
       RETURN
-      END   !SUBROUTINE VSTAGES
+      END   !SUBROUTINE TG_VSTAGES
 
 !-----------------------------------------------------------------------
 !     PHENOLOGY VARIABLES LIST
