@@ -1,5 +1,5 @@
 C=======================================================================
-C  SENES, Subroutine, K.J. Boote, J.W. Jones and G. Hoogenboom
+C  TG_SENES, Subroutine, K.J. Boote, J.W. Jones and G. Hoogenboom
 C  Calculates leaf senescence due to natural aging, drought stress,
 C  light stress, and physiological maturity.
 C-----------------------------------------------------------------------
@@ -16,7 +16,7 @@ C  Called : PLANT
 C  Calls  : ERROR, FIND, IGNORE
 C========================================================================
 
-      SUBROUTINE SENES(DYNAMIC,
+      SUBROUTINE TG_SENES(DYNAMIC,
      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
@@ -31,7 +31,7 @@ C-----------------------------------------------------------------------
       CHARACTER*6  ERRKEY, SECTION
       CHARACTER*80 CHAR
       CHARACTER*92 FILECC
-      PARAMETER (ERRKEY = 'SENES')
+      PARAMETER (ERRKEY = 'TG_SENES')
 
       INTEGER I, II, LUNCRP, ERR, LINC, LNUM, ISECT
       INTEGER DYNAMIC
@@ -43,6 +43,7 @@ C-----------------------------------------------------------------------
       REAL DTX, NRUSLF, PAR, RATTP, RHOL, SLAAD
       REAL STMWT, VSTAGE, CLW, WTLF, XLAI
       REAL SLDOT, SLNDOT, SSDOT, SSNDOT
+      REAL SSDOT1, SSDOT2, STEM_SEN								   
       REAL ICMP, KCAN, PORPT, SENDAY
       REAL SENRT2, SENRTE, TCMP
       REAL LCMP, LTSEN, PORLFT, LFSEN, SWFAC, WSLOSS, TABEX
@@ -137,8 +138,25 @@ C-----------------------------------------------------------------------
      &      (SENPOR(II),II=1,4),(SENMAX(II),II=1,4)
         IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
       ENDIF
+!-----------------------------------------------------------------------
+!    Find and Read STEM Senescence Section
+!    NOTE: First search for Section finds '!*LEAF GROWTH PARAMETERS'
+!          Second search finds '!*LEAF SENESCENCE FACTORS'
+!-----------------------------------------------------------------------
+      SECTION = '!*STEM'
+      CALL FIND(LUNCRP, SECTION, LINC, FOUND) ; LNUM = LNUM + LINC
+      IF (FOUND .EQ. 0) THEN
+        CALL ERROR(SECTION, 42, FILECC, LNUM)
+      ELSE
+        !CALL IGNORE(LUNCRP,LNUM,ISECT,CHAR)
+        !READ(CHAR,'(3F6.0)',IOSTAT=ERR) SENRTE, SENRT2, SENDAY
+        !IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
 
-      CLOSE (LUNCRP)
+        CALL IGNORE(LUNCRP,LNUM,ISECT,CHAR)
+        READ(CHAR,'(2F6.0)',IOSTAT=ERR) STEM_SEN
+        IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
+      ENDIF
+      CLOSE (LUNCRP)	
 
 !***********************************************************************
 !***********************************************************************
@@ -146,6 +164,8 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. SEASINIT) THEN
 !-----------------------------------------------------------------------
+      SSDOT2  = 0.0 !Daily senescence of petioles (g / m2 / d)
+      SSDOT1 = 0.0 !Daily senescence of stem (g / m2 / d)													 
       SSDOT  = 0.0
       SLDOT  = 0.0
       SLNDOT = 0.0
@@ -174,9 +194,18 @@ C-----------------------------------------------------------------------
       RATTP = SWFCAB(NSWAB)
 
       SSDOT = 0.0
+      SSDOT1 = 0.0
+      SSDOT2 = 0.0			  
       SLDOT = 0.0
       SLNDOT = 0.0
       SSNDOT = 0.0
+       ! Stem senescence, Boote gives "stem senesced = fraction per day (this is your constant) * DTX * STEMWT"
+        SSDOT1 = 0.0
+        IF (STMWT > 1.E-6) THEN
+          SSDOT1 = STMWT * STEM_SEN * DTX   !SSDOT1 is in (g / m2 / d)
+        ELSE
+          SSDOT1 = 0.0
+        ENDIF
       IF (DAS .LE. NR7 .AND. VSTAGE .GE. 1.0) THEN
 C-----------------------------------------------------------------------
 C     This section calculates natural senescence prior to the
@@ -226,8 +255,9 @@ C-----------------------------------------------------------------------
           SLNDOT = WSLOSS
         ENDIF
         SLDOT = SLDOT + SLNDOT
-        SSDOT = SLDOT * PORPT
-        SSDOT = MIN(SSDOT,0.1*STMWT)
+        SSDOT2 = SLDOT * PORPT
+        SSDOT2 = MIN(SSDOT2,0.1*STMWT)
+		SSDOT = SSDOT1 + SSDOT2					   
         SSNDOT = SLNDOT * PORPT
         SSNDOT = MIN(SSDOT,SSNDOT)
 C-----------------------------------------------------------------------
@@ -238,13 +268,13 @@ C-----------------------------------------------------------------------
         IF (WTLF .GT. 0.0001) THEN
           SLDOT = WTLF * SENRT2
           SLNDOT = SLDOT
-          SSDOT = SLDOT * PORPT
+          SSDOT = SSDOT1 + SLDOT * PORPT
           SSNDOT = SSDOT
         ELSE
           SLDOT = 0.0
-          SSDOT = 0.0
+          SSDOT = SSDOT1 + 0.0
           SLNDOT = 0.0
-          SSNDOT = 0.0
+          SSNDOT = SSDOT1 + 0.0
         ENDIF
         IF (STMWT .LT. 0.0001) THEN
           SLNDOT = 0.0
@@ -259,9 +289,9 @@ C-----------------------------------------------------------------------
       ENDIF
 !***********************************************************************
       RETURN
-      END ! SUBROUTINE SENES
+      END ! SUBROUTINE TG_SENES
 !***********************************************************************
-!     SENES VARIABLE DEFINITIONS:
+!     TG_SENES VARIABLE DEFINITIONS:
 !-----------------------------------------------------------------------
 ! CHAR      Contains the contents of last record read 
 ! CLW       Cumulative leaf growth (g[leaf]/m2)
