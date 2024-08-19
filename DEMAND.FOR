@@ -1,5 +1,5 @@
 C=======================================================================
-C  DEMAND, Subroutine, J.W. Jones and G. Hoogenboom.
+C  TG_DEMAND, Subroutine, J.W. Jones and G. Hoogenboom.
 C-----------------------------------------------------------------------
 C  Calculates potential demand for C and N based upon new growth and
 C  existing N deficiency in old tissue.
@@ -22,7 +22,7 @@ C  Called by:  PLANT
 C  Calls:      SDCOMP, IPDMND
 C=======================================================================
 
-      SUBROUTINE DEMAND(DYNAMIC, CONTROL,
+      SUBROUTINE TG_DEMAND(DYNAMIC, CONTROL,
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
      &  LNGPEG, NDLEAF, NSTRES, PAR, PCNL, PCNRT, PCNST,  !Input
@@ -48,7 +48,7 @@ C=======================================================================
       CHARACTER*2 CROP
       CHARACTER*3 TYPSDT
       CHARACTER*6   ERRKEY
-      PARAMETER (ERRKEY = 'DEMAND')
+      PARAMETER (ERRKEY = 'TG_DEMAND')
       CHARACTER*30 FILEIO
       CHARACTER*78 MSG(2)
       CHARACTER*92 FILECC, FILEGC
@@ -145,27 +145,28 @@ C=======================================================================
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. SEASINIT) THEN
 !-----------------------------------------------------------------------
-      CDMSDR = 0.0
-      GDMSDR = 0.0
-      FNINSD = 0.0
-      NDMNEW = 0.0
-      NDMREP = 0.0
-      NDMSD  = 0.0
-      NDMSH  = 0.0
-      NDMSDR = 0.0
-      NDMVEG = 0.0
-      NMOBR  = 0.0
-      SDGR   = 0.0
-      FNINL  = 0.0
-      FNINS  = 0.0
-      FNINR  = 0.0
-      NMINEP = 0.0
-      
-      RPRPUN = 1.0 
-      TMPFAC = 1.0
-      
-      CUMNSF = 1.0
-      NFSL   = 1.0
+      IF (CONTROL%RUN .EQ. 1 .OR. INDEX('QPF',CONTROL%RNMODE).LE.0) THEN
+        CDMSDR = 0.0
+        GDMSDR = 0.0
+        FNINSD = 0.0
+        NDMNEW = 0.0
+        NDMSD  = 0.0
+        NDMSDR = 0.0
+        NDMVEG = 0.0
+        NMOBR  = 0.0
+        SDGR   = 0.0
+        FNINL  = 0.0
+        FNINR  = 0.0
+        NMINEP = 0.0
+        RPRPUN = 1.0 
+        TMPFAC = 1.0
+      endif
+        NDMREP = 0.0
+        NDMSH  = 0.0
+        FNINS  = 0.0
+		
+        CUMNSF = 1.0
+        NFSL   = 1.0
 !-----------------------------------------------------------------------
 !     SET VARIETY SPECIFIC LEAF PARAMETERS
 !-----------------------------------------------------------------------
@@ -198,6 +199,7 @@ C=======================================================================
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. EMERG) THEN
 !-----------------------------------------------------------------------
+      IF (CONTROL % RUN == 1 .OR. INDEX('FPQ',CONTROL%RNMODE) < 0) THEN																					   
         XFRT   = XFRUIT
         XFRUIT2 = XFRUIT
         ADDSHL = 0.0
@@ -218,7 +220,21 @@ C=======================================================================
         FNINL  = PROLFI * 0.16  
         FNINS  = PROSTI * 0.16  
         FNINR  = PRORTI * 0.16  
-
+      ELSE
+        ADDSHL = 0.0    ! Today's growth demand for shells of age NPP (g[shell] / m2 / d)
+        TURXFR = 0.0    ! Turgor water stress factor used to modify partitioning to
+        GDMSD  = 0.0    ! Seed growth demand based on temperature and photoperiod
+        CDMSD  = 0.0    ! Total CH2O demand to grow seed demand (GDMSD)
+        NDMSD  = 0.0    ! Total N demand to grow seed demand (GDMSD) (g[N] / m2 / d)
+        GDMSDR = 0.0    ! Potential seed growth from NDMSDR (amount of Mobilized N which
+        CDMSDR = 0.0    ! CH2O required for seed growth from mobilized N
+        CDMREP = 0.0    ! Total CH2O needed for potential reproductive growth
+        NAGE   = 0      ! Age of cohort (d)
+        DO NPP = 1,NCOHORTS
+          PHTIM(NPP) = 0. !Cumulative photothermal time ages of seeds and shells
+          PNTIM(NPP) = 0. ! Photothermal days from first flower when flowers in age group I
+        END DO
+      ENDIF
 !***********************************************************************
 !***********************************************************************
 !     DAILY RATE/INTEGRATION
@@ -679,7 +695,7 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !-----------------------------------------------------------------------
 
       RETURN
-      END SUBROUTINE DEMAND
+      END SUBROUTINE TG_DEMAND
 !=======================================================================
 
 !=======================================================================
