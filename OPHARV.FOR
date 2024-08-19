@@ -1,5 +1,5 @@
 C=======================================================================
-C  OPHARV, Subroutine G. Hoogenboom, J. W. Jones
+C  TG_OPHARV, Subroutine G. Hoogenboom, J. W. Jones
 C  Generates output for seasonal data.
 C-----------------------------------------------------------------------
 C  REVISION HISTORY
@@ -24,7 +24,7 @@ C  07/08/2022 GH  Add CU for Cucumber
 C  05/01/2023 GH  Add GY for Guar; SR for Strawberry
 C=======================================================================
 
-      SUBROUTINE OPHARV(CONTROL, ISWITCH, 
+      SUBROUTINE TG_OPHARV(CONTROL, ISWITCH, 
      &    AGEFAC, CANHT, CANNAA, CANWAA, CROP,            !Input
      &    HARVFRAC, LAIMX, MDATE, NSTRES, PCLSD, PCNSD,   !Input
      &    PODNO, PODWT, PStres1, PStres2, SDRATE, SDWT,   !Input
@@ -46,7 +46,7 @@ C-----------------------------------------------------------------------
       CHARACTER*1  RNMODE,IDETO,IPLTI, PLME
       CHARACTER*2  CROP
       CHARACTER*6  SECTION
-      CHARACTER*6, PARAMETER :: ERRKEY = 'OPHARV'
+      CHARACTER*6, PARAMETER :: ERRKEY = 'TG_OPHARV'
       CHARACTER*10 STNAME(20)
       CHARACTER*12 FILEA
       CHARACTER*30 FILEIO
@@ -198,10 +198,18 @@ C-----------------------------------------------------------------------
       CALL GETDESC(ACOUNT, OLAB, DESCRIP)
       OLAP = OLAB
 
+!     Check QPF!!	  
+      IF (CONTROL%RUN .EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE. 0) THEN																		
       BIOMAS = -99.
       VSTAGE = -99.
       WTNCAN = -99.
-      XLAI   = -99.
+	  endif	   
+
+!     Check QPF!!	  
+      ! Add the following if statement by JZW
+      IF (CONTROL%RUN .EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE. 0) THEN											 
+       XLAI   = -99.
+	  endif   
       YIELD  = -99.
       RSTAGE = -99.
 
@@ -350,7 +358,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
       IF ((INDEX('YE',IDETO) > 0 .OR. INDEX('IAEBCGDT',RNMODE) .GT. 0) 
      &  .OR. (INDEX('AY',ISWITCH%IDETS) .GT. 0 .AND. CROP .NE.'FA'))THEN
-         IF (INDEX('FQ',RNMODE) > 0) THEN
+         IF (INDEX('FQ',RNMODE) > 0) THEN !Check FQxFPQ!!
            TRT_ROT = CONTROL % ROTNUM
          ELSE
            TRT_ROT = TRTNUM
@@ -611,7 +619,7 @@ C     Byproduct not harvested is incorporated
       ENDIF
 !***********************************************************************
       RETURN
-      END SUBROUTINE OPHARV
+      END SUBROUTINE TG_OPHARV
 C=======================================================================
 
 
