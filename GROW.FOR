@@ -1,5 +1,5 @@
 C=======================================================================
-C  GROW, Subroutine, G. Hoogenboom, J.W. Jones, and K.J.Boote
+C  TG_GROW, Subroutine, G. Hoogenboom, J.W. Jones, and K.J.Boote
 C-----------------------------------------------------------------------
 C  Governing Model Equations
 C  Integrates all growth related variables
@@ -19,6 +19,7 @@ C  03/12/2003 CHP Changed senescence variable to composite (SENESCE)
 C                   as defined in ModuleDefs.for
 C  03/24/2004 CHP Added P component of senesced matter
 C  01/19/2006 CHP N in senesced roots lost at actual N%, not minimum.
+!  09/23/2011 JZW/CHP Convert from CROPGRO to TREEGRO subroutines
 C  04/01/2021 VSH/AH Added MultiHarvest code changes.
 !  06/15/2022 CHP Added CropStatus
 C-----------------------------------------------------------------------
@@ -26,7 +27,7 @@ C  Called by:  PLANT
 C  Calls:      IPGROW, STRESS
 C              ERROR
 C=======================================================================
-      SUBROUTINE GROW(CONTROL, ISWITCH, DYNAMIC, SOILPROP, 
+      SUBROUTINE TG_GROW(CONTROL, ISWITCH, DYNAMIC, SOILPROP, 
      &  AGEFAC, CADLF, CADST, CRUSLF, CRUSRT, CRUSSH,     !Input
      &  CRUSST, DISLA, F, FILECC, FRLF, FRSTM,            !Input
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
@@ -71,7 +72,7 @@ C=======================================================================
       CHARACTER*1  ISWSYM, ISWNIT, IDETO, IHARI, PLME
       CHARACTER*2  XPODF, CROP
       CHARACTER*6  ERRKEY
-      PARAMETER (ERRKEY = 'GROW  ')
+      PARAMETER (ERRKEY = 'TG_GROW  ')
       CHARACTER*30 FILEIO
       CHARACTER*92 FILECC
 
@@ -156,7 +157,9 @@ C=======================================================================
 !     P module
       REAL ADD
       REAL ShutMob, RootMob, ShelMob
-
+!     Added for TREEGRO warning message
+      CHARACTER*78 MSG(2)
+	  
       REAL TOSHMINE, TOCHMINE
       REAL HPODWT,HSDWT,HSHELWT
       REAL NHSHWT, NHSDWT
@@ -239,120 +242,134 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ELSEIF (DYNAMIC == SEASINIT) THEN
 !-----------------------------------------------------------------------
-      ALFDOT = 0.0
-      AREALF = 0.0
-      AREAH  = 0.0
-      CANWAA = 0.0
-      CANNAA = 0.0
-      GROWTH = 0.0
-      GRWRES = 0.0
-      LAIMX  = 0.0
-      NLDOT  = 0.0
-      NSDOT  = 0.0
-      NRDOT  = 0.0
-      NSDDOT = 0.0
-      NSHDOT = 0.0
-      NTOVR  = 0.0
-      PCCSD  = 0.0
-      PCLSD  = 0.0
-      PCNL   = 0.0
-      PCNRT  = 0.0
-      PCNSD  = 0.0
-      PCNSH  = 0.0
-      PCNST  = 0.0
-      PODWT  = 0.0
-      RHOL   = 0.0
-      RHOR   = 0.0
-      RHOS   = 0.0
-      RHOSH  = 0.0
-      RTWT   = 0.0
-      SDRATE = 0.0
-      SDWT   = 0.0
-      SDWTAM = 0.0
-      SEEDNI = 0.0
-      SEEDNO = 0.0
+      IF (CONTROL%RUN .EQ. 1 .OR. INDEX('QPF',CONTROL%RNMODE).LE.0) THEN																																 									 
+        AREALF = 0.0						   
+        AREAH  = 0.0													  
+		PCNL   = 0.0
+        PCNRT  = 0.0
+     !   PCNSD  = 0.0
+     !   PCNSH  = 0.0
+        PCNST  = 0.0
+        RHOL   = 0.0
+        RHOR   = 0.0
+        RHOS   = 0.0																	 	
+		RTWT   = 0.0														 
+		SLAAD  = 0.0							  
+        STMWT  = 0.0        
+		
+        WCRLF  = 0.0
+        WCRRT  = 0.0
+        WCRST  = 0.0
+        WNRLF  = 0.0
+        WNRRT  = 0.0
+        WTLF   = 0.0
+        WTMAIN = 0.0		
+        WTNCAN = 0.0
+		WTNLF  = 0.0
+		WTNNOD = 0.0
+		WTNRT  = 0.0
+		WTNSD  = 0.0
+		ShutMob = 0.0
+		
+        RootMob = 0.0																		 
+        SDPDOT = 0.0    !CHP - not used
+        PUNDOT = 0.0    !CHP - not used										  
 
-      SenWt  = 0.0
-      SenLig = 0.0
-      SenE   = 0.0
-      SENESCE % ResWt  = 0.0
-      SENESCE % ResLig = 0.0
-      SENESCE % ResE   = 0.0
-      SENESCE % CumResE(N) = 0.0
+        NLPEST = 0.0    !CHP - N loss due to pest damage	
+      ENDIF		
+        ALFDOT = 0.0
+		CANWAA = 0.0											   
+        CANNAA = 0.0
+        GROWTH = 0.0
+        GRWRES = 0.0
+        LAIMX  = 0.0
+        NLDOT  = 0.0
+        NSDOT  = 0.0
+        NRDOT  = 0.0
+        NSDDOT = 0.0
+        NSHDOT = 0.0
+        NTOVR  = 0.0
+        PCCSD  = 0.0
+        PCLSD  = 0.0
+!        PCNSD  = 0.0  !Percentage of N in seed tissue
+!        PCNSH  = 0.0  !Percentage of N in shell tissue								 												  
+        PODWT  = 0.0		
+		RHOSH  = 0.0																				   																						  
+        SDRATE = 0.0
+        SDWT   = 0.0
+        SDWTAM = 0.0
+        SEEDNI = 0.0
+        SEEDNO = 0.0																	
+        TGROW  = 0.0
+        TOPWT  = WTLF + STMWT !Total weight of above-ground portion of crop, including pods
+        TOTWT  = TOPWT + RTWT !Total weight of crop
+        SenWt  = 0.0
+        SenLig = 0.0
+        SenE   = 0.0
+        SENESCE % ResWt  = 0.0
+        SENESCE % ResLig = 0.0
+        SENESCE % ResE   = 0.0
+        SENESCE % CumResE(N) = 0.0
+	    SHELWT = 0.0
+		WCRSH  = 0.0
+		WNRSH  = 0.0
+        WNRST  = 0.0
+		WSDDOT = 0.0
+		WSHDOT = 0.0
+		WTCO   = 0.0
+        WTCSD  = 0.0
+        WTLO   = 0.0
+        WTLSD  = 0.0
+        WTNLA  = 0.0
+        WTNLO  = 0.0
+        WTNMOB = 0.0
+        WTNNA  = 0.0
+        WTNNAG = 0.0
+        WTNNO  = 0.0  
+        WTNOO  = 0.0
+        WTNRA  = 0.0
+        WTNRO  = 0.0  
+        WTNSA  = 0.0      
+        WTNSDA = 0.0
+        WTNSDO = 0.0
+        WTNSH  = 0.0
+        WTNSHA = 0.0
+        WTNSHO = 0.0
+        WTNSO  = 0.0
+        IF (CONTROL%RUN.EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE.0) THEN      
+	      WTNST  = 0.0
+          WTNTOT = 0.0
+		Endif
+		
+        WTNUP  = 0.0
+        WTRO   = 0.0
+        WTSDO  = 0.0
+        WTSHO  = 0.0
+        WTSO   = 0.0
+        IF (CONTROL%RUN.EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE.0) THEN     
+	    XLAI   = 0.0
+        XHLAI  = 0.0
+        endif  
+        XPOD   = 0.0
+        if (CONTROL%RUN .EQ.1 .OR.INDEX('QPF',CONTROL%RNMODE).LE.0) then
+          CLW = 0.0   !Cumulative leaf growth
+          CSW = 0.0   !Cumulative stem growth
+        endif
+      
+        ShelMob = 0.0
 
-      SHELWT = 0.0
-      SLAAD  = 0.0
-      STMWT  = 0.0
-      TGROW  = 0.0
-      TOPWT  = 0.0
-      TOTWT  = 0.0
-      WCRLF  = 0.0
-      WCRRT  = 0.0
-      WCRSH  = 0.0
-      WCRST  = 0.0
-      WNRLF  = 0.0
-      WNRRT  = 0.0
-      WNRSH  = 0.0
-      WNRST  = 0.0
-      WSDDOT = 0.0
-      WSHDOT = 0.0
-      WTCO   = 0.0
-      WTCSD  = 0.0
-      WTLF   = 0.0
-      WTLO   = 0.0
-      WTLSD  = 0.0
-      WTMAIN = 0.0
-      WTNCAN = 0.0
-      WTNLA  = 0.0
-      WTNLF  = 0.0
-      WTNLO  = 0.0
-      WTNMOB = 0.0
-      WTNNA  = 0.0
-      WTNNAG = 0.0
-      WTNNO  = 0.0
-      WTNNOD = 0.0
-      WTNOO  = 0.0
-      WTNRA  = 0.0
-      WTNRO  = 0.0
-      WTNRT  = 0.0
-      WTNSA  = 0.0
-      WTNSD  = 0.0
-      WTNSDA = 0.0
-      WTNSDO = 0.0
-      WTNSH  = 0.0
-      WTNSHA = 0.0
-      WTNSHO = 0.0
-      WTNSO  = 0.0
-      WTNST  = 0.0
-      WTNTOT = 0.0
-      WTNUP  = 0.0
-      WTRO   = 0.0
-      WTSDO  = 0.0
-      WTSHO  = 0.0
-      WTSO   = 0.0
-      XLAI   = 0.0
-      XHLAI  = 0.0
-      XPOD   = 0.0
 
-      CLW = 0.0   !Cumulative leaf growth
-      CSW = 0.0   !Cumulative stem growth
+        NHSHWT = 0.0    !CHP - N loss due to Multi-Harvest for shell wt
+        NHSDWT = 0.0    !CHP - N loss due to Multi-Harvest for seed wt
 
-      ShutMob = 0.0
-      RootMob = 0.0
-      ShelMob = 0.0
-
-      SDPDOT = 0.0    !CHP - not used
-      PUNDOT = 0.0    !CHP - not used
-
-      NHSHWT = 0.0    !CHP - N loss due to Multi-Harvest for shell wt
-      NHSDWT = 0.0    !CHP - N loss due to Multi-Harvest for seed wt
-      NLPEST = 0.0    !CHP - N loss due to pest damage
-
+      
 !-----------------------------------------------------------------------
 ! KJB 02/12/03 Set SLA to zero until emergence
 ! JWJ 09/16/03 Set SLA to -99 until emergence
 ! CHP 09/17/03 Do this for output only - SLA is used in calculations!
-      SLA = 0.0
+        IF (CONTROL%RUN.EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE.0) THEN																		
+          SLA = 0.0
+		endif	  
 !     Need to get initial value of F from DEMAND first  chp 9/14/98
 !      IF (CROP .NE. 'FA') THEN
 !        SLA    = F                 
@@ -365,23 +382,28 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ELSEIF (DYNAMIC == EMERG) THEN
 !-----------------------------------------------------------------------
-!     Net growth rates
-      WLDOT  = 0.0
-      WSDOT  = 0.0
-      WRDOT  = 0.0
-      WNDOT  = 0.0
-      WPDOT  = 0.0
-      WLFDOT = 0.0
+      IF (CONTROL % RUN == 1 .OR. INDEX('FPQ',CONTROL%RNMODE) < 0) THEN																	   
+!       Net growth rates
+        WLDOT  = 0.0
+        WSDOT  = 0.0
+        WRDOT  = 0.0
+        WNDOT  = 0.0
+        WPDOT  = 0.0
+        WLFDOT = 0.0
 
 C     Initial seedling or transplant weight
-      SDRATE  = WTPSD * PLTPOP / 0.8 * 10
+      SDRATE  = WTPSD * PLTPOP / 0.8 * 10											  									
 
       IF (PLME .NE. 'T') THEN
         WTNEW  = WTFSD * WTPSD
         TOTWT  = WTNEW * PLTPOP
       ELSE
-        TOTWT = SDWTPL / 10.
+        TOTWT = SDWTPL / 10.* 1000.
         WTNEW = TOTWT / PLTPOP
+!       Send message to WARNING.OUT
+        MSG(1) = "Initial plant biomass input in tons/ha (not kg/ha)."
+        WRITE(MSG(2),'(A,F8.3,A)') "PLWT = ", SDWTPL, "t/ha"
+        CALL WARNING(2,ERRKEY,MSG)
       ENDIF
 
 !     Initial mass of plant components
@@ -393,7 +415,6 @@ C     Initial seedling or transplant weight
       WLFI   = WTLF
       WSTI   = STMWT
       WRTI   = RTWT
-
 !     Initialize cumulative variables
       CLW   = WTLF
       CSW   = STMWT
@@ -412,7 +433,7 @@ C     Initial seedling or transplant weight
       RHOL   = ALPHL
       RHOR   = ALPHR
       RHOS   = ALPHS
-      RHOSH  = ALPHSH
+      RHOSH  = ALPHSH																				 											  
 
 !     Net carbon addition variables
       WRCLDT = 0.0
@@ -453,6 +474,20 @@ C     Initial seedling or transplant weight
       XLAI   = AREALF / 10000.
       XHLAI  = XLAI
 
+      ELSE
+        IF (CONTROL %RUN == 1 .OR. INDEX('FPQ',CONTROL%RNMODE) < 0) THEN
+!       For season 2, 3, etc.
+!       Initialize cumulative variables
+        CLW   = 0.0   !CLW: Cumulative leaf growth (g[leaf]/m2)
+        CSW   = 0.0   !CSW: Cumulative stem growth (g[stem]/m2)
+        endif
+!       Seed or transplant N at planting
+        SDNPL  = WTNTOT
+!       Initialize cumulative N variables
+        WTNLA  = 0.0 !WTNLA: Cumulative N added to leaves (g[N]/m2-d)
+        WTNSA  = 0.0 !WTNSA: Cumulative N added to stems (g[N]/m2-d)
+        WTNRA  = 0.0 !WTNRA: Cumulative N added to roots (g[N]/m2-d)
+      ENDIF																										   									 
 C***********************************************************************
 C***********************************************************************
 C     Daily integration
@@ -1048,6 +1083,9 @@ C-----------------------------------------------------------------------
 C     Leaf Area, Specific Leaf Area Calculations
 C     Calculate Area Growth rate and Update Leaf Area (AREALF, XLAI)
 C-----------------------------------------------------------------------
+      if (control % DAS .eq. 365) then
+       continue
+      endif
       ALFDOT = WLDOTN*F - (SLDOT+WLIDOT+WLFDOT+NRUSLF/0.16)*SLA
       IF (WTLF > 1.E-4) THEN
          ALFDOT = ALFDOT + SLA * (NADLF/0.16) *
@@ -1143,7 +1181,7 @@ C***********************************************************************
       ENDIF
 C-----------------------------------------------------------------------
       RETURN
-      END  ! SUBROUTINE GROW
+      END  ! SUBROUTINE TG_GROW
 C=======================================================================
 
 C=======================================================================
