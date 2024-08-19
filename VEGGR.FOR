@@ -1,5 +1,5 @@
 C=======================================================================
-C  VEGGR, Subroutine, J. W. Jones, K. J. Boote, G. Hoogenboom
+C  TG_VEGGR, Subroutine, J. W. Jones, K. J. Boote, G. Hoogenboom
 C  Calculates vegetative partitioning as a function of V stage,
 C  and limits growth prior to VSINK.
 C-----------------------------------------------------------------------
@@ -20,13 +20,14 @@ C  06/21/2001 GH  Modified seasonal initialization
 C  08/12/2003 CHP Added I/O error checking
 !  07/13/2006 CHP Added P model
 !  06/11/2007 CHP PStres2 affects growth
+!  03/14/2012 JZW Add the input argument PLME because TG_Canopy need read I File when PLME = "T" 																								 
 C-----------------------------------------------------------------------
 C  Called by: PLANT
 C  Calls:     CANOPY
 C             ERROR, FIND, IGNORE
 C========================================================================
 
-      SUBROUTINE VEGGR (DYNAMIC, 
+      SUBROUTINE TG_VEGGR (DYNAMIC, PLME, 
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -47,8 +48,9 @@ C========================================================================
       EXTERNAL GETLUN, FIND, ERROR, IGNORE, CANOPY
       SAVE
 
+      CHARACTER*1  PLME					   
       CHARACTER*6  ERRKEY
-      PARAMETER   (ERRKEY = 'VEGGR')
+      PARAMETER   (ERRKEY = 'TG_VEGGR')
 
       CHARACTER*6  ECONO, SECTION
       CHARACTER*80 C80
@@ -97,6 +99,8 @@ C========================================================================
 !     Run Initialization - Called once per simulation
 !***********************************************************************
       IF (DYNAMIC .EQ. RUNINIT) THEN
+      !Add the following if statement by JZW
+      IF (CONTROL % RUN == 1 .OR. INDEX('FPQ',CONTROL%RNMODE) < 0) THEN																   
 !-----------------------------------------------------------------------
 !     Read in values from input file, which were previously input
 !       in Subroutine IPCROP.
@@ -164,7 +168,7 @@ C========================================================================
 !-----------------------------------------------------------------------
 !    Call CANOPY for input
 !-----------------------------------------------------------------------
-      CALL CANOPY(RUNINIT,
+      CALL TG_CANOPY(RUNINIT, Control, PLME,
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI, NSTRES,     !Input
      &    CANHT, CANWH)                                   !Output
@@ -204,7 +208,7 @@ C========================================================================
       PNSTRES= 1.0
       XNSTRES= 1.0
       
-      CALL CANOPY(SEASINIT,
+      CALL TG_CANOPY(SEASINIT, CONTROL, PLME,
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI, NSTRES,     !Input
      &    CANHT, CANWH)                                   !Output
@@ -214,14 +218,15 @@ C========================================================================
 !     EMERGENCE CALCULATIONS - Performed once per season upon emergence
 !         or transplanting of plants
 !***********************************************************************
-      ELSEIF (DYNAMIC .EQ. EMERG) THEN
+       ELSEIF (DYNAMIC .EQ. EMERG) THEN
 !-----------------------------------------------------------------------
-      FNINLG = PROLFG * 0.16   
-      FNINRG = PRORTG * 0.16   
-      FNINSG = PROSTG * 0.16   
-      CUMTUR = 1.0             
+      IF (CONTROL %RUN == 1 .OR. INDEX('FPQ',CONTROL%RNMODE) < 0) THEN																	  
+        FNINLG = PROLFG * 0.16   
+        FNINRG = PRORTG * 0.16   
+        FNINSG = PROSTG * 0.16   
+        CUMTUR = 1.0             
 
-      CALL CANOPY(EMERG,
+      CALL TG_CANOPY(EMERG, CONTROL, PLME,
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI, NSTRES,     !Input
      &    CANHT, CANWH)                                   !Output
@@ -463,7 +468,7 @@ C     Subroutine CANOPY calculates height and width of the canopy as a
 C     function of VSTAGE, air temperature, drought stress (TURFAC),
 C     daylenght and radiation (PAR).
 C-----------------------------------------------------------------------
-      CALL CANOPY(INTEGR,
+      CALL TG_CANOPY(INTEGR, CONTROL, PLME,
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI, NSTRES,     !Input
      &    CANHT, CANWH)                                   !Output
@@ -613,6 +618,6 @@ C-----------------------------------------------------------------------
 ! YRDOY   Current day of simulation (YYDDD)
 ! YRSIM   Start of simulation date (YYDDD)
 !-----------------------------------------------------------------------
-!     END SUBROUTINE VEGGR
+!     END SUBROUTINE TG_VEGGR
 !-----------------------------------------------------------------------
 
