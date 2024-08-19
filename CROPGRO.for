@@ -7,9 +7,9 @@ C
 C ALL RIGHTS RESERVED
 C=======================================================================
 C=======================================================================
-C  CROPGRO, Subroutine, G. Hoogenboom, J.W. Jones, K.J. Boote, C. Porter
+C  TREEGRO, Subroutine, G. Hoogenboom, J.W. Jones, K.J. Boote, C. Porter
 C-----------------------------------------------------------------------
-C  CROPGRO template plant growth subroutine.
+C  TREEGRO template plant growth subroutine.
 C  Computes plant development and growth.
 C-----------------------------------------------------------------------
 C  REVISION       HISTORY
@@ -34,12 +34,22 @@ C  07/08/2003 CHP Added KSEVAP for export to soil evaporation routines.
 !  06/06/2006 CHP/CDM Added KC_SLOPE to SPE file and KC_ECO to ECO file.
 !  07/13/2006 CHP Added P model
 !  06/11/2007 CHP PStres1 affects photosynthesis, PStres2 affects growth
+!  10/20/2009 CHP Soil water stress factors computed in SPAM to accomodate
+!                   2D, variable time step model.
 !  06/15/2022 CHP Added CropStatus
 !  01/26/2023 CHP Reduce compile warnings: add EXTERNAL stmts, remove 
 !                 unused variables, shorten lines. 
 C=======================================================================
+! This is the original Subroutine from 4.5
 
-      SUBROUTINE CROPGRO(CONTROL, ISWITCH, 
+!      SUBROUTINE TREEGRO(CONTROL, ISWITCH, 
+!     &    CELLS, HARVFRAC, NH4, NO3, SOILPROP, SPi_AVAIL, !Input
+!     &    ST, SW, SWFAC, TURFAC, WEATHER, YREND, YRPLT,   !Input
+!     &    CANHT, EORATIO, HARVRES, KSEVAP, KTRANS, MDATE, !Output											 
+!     &    NSTRES, PUptake, PORMIN, RLV, RWUMX, SENESCE,   !Output
+!     &    STGDOY, FracRts, UNH4, UNO3, XHLAI, XLAI)       !Output
+	 
+      SUBROUTINE TREEGRO(CONTROL, ISWITCH, 
      &    EOP, HARVFRAC, NH4, NO3, SOILPROP, SPi_AVAIL,   !Input
      &    ST, SW, TRWUP, WEATHER, YREND, YRPLT,           !Input
      &    CANHT, CropStatus, EORATIO, HARVRES, KSEVAP,    !Output
@@ -49,6 +59,7 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
+!      USE Cells_2D       !From original code
       USE ModuleData
 
       IMPLICIT NONE
@@ -58,7 +69,7 @@ C=======================================================================
      &  VEGGR
       SAVE
 !-----------------------------------------------------------------------
-      CHARACTER*1 DETACH, IDETO, ISWNIT, ISWSYM,
+      CHARACTER*1 DETACH, IDETO, ISWNIT, ISWSYM, PLME,
      &    ISWWAT, ISWDIS, ISWPHO, MEPHO, RNMODE
       CHARACTER*2 CROP
       CHARACTER*6 ECONO
@@ -227,7 +238,7 @@ C=======================================================================
 !***********************************************************************
       IF (DYNAMIC .EQ. RUNINIT) THEN
 !-----------------------------------------------------------------------
-!     Call input routine for CROPGRO module parameters
+!     Call input routine for TREEGRO module parameters
 !-----------------------------------------------------------------------
       CALL IPPLNT(CONTROL, ISWITCH, 
      &  CADPR1, CMOBMX, CROP, DETACH, ECONO,              !Output
@@ -259,7 +270,7 @@ C=======================================================================
      &    NDSET, NR1, NR2, NR5, NR7, NVEG0, PHTHRS,       !Output
      &    RSTAGE, RVSTGE, STGDOY, SeedFrac, TDUMX,        !Output
      &    TDUMX2, VegFrac, VSTAGE, YREMRG, YRNR1,         !Output
-     &    YRNR2, YRNR3, YRNR5, YRNR7)                     !Output
+     &    YRNR2, YRNR3, YRNR5, YRNR7, PLME)               !Output
 
 !-----------------------------------------------------------------------
       IF (ISWDIS .EQ. 'Y') THEN
@@ -365,7 +376,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call to root growth and rooting depth routine
 C-----------------------------------------------------------------------
-        CALL ROOTS(RUNINIT,
+        CALL ROOTS(RUNINIT, Control,
      &    AGRRT, CROP, DLAYR, DS, DTX, DUL, FILECC, FRRT, !Input
      &    ISWWAT, LL, NLAYR, PG, PLTPOP, RO, RP, RTWT,    !Input
      &    SAT, SW, SWFAC, VSTAGE, WR, WRDOTN, WTNEW,      !Input
@@ -483,7 +494,7 @@ C-----------------------------------------------------------------------
      &    NDSET, NR1, NR2, NR5, NR7, NVEG0, PHTHRS,       !Output
      &    RSTAGE, RVSTGE, STGDOY, SeedFrac, TDUMX,        !Output
      &    TDUMX2, VegFrac, VSTAGE, YREMRG, YRNR1,         !Output
-     &    YRNR2, YRNR3, YRNR5, YRNR7)                     !Output
+     &    YRNR2, YRNR3, YRNR5, YRNR7, PLME)               !Output
 
 !-----------------------------------------------------------------------
 C     Initialize pest coupling point and damage variables
@@ -634,7 +645,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call to root growth and rooting depth routine
 C-----------------------------------------------------------------------
-      CALL ROOTS(SEASINIT,
+      CALL ROOTS(SEASINIT, Control,
      &    AGRRT, CROP, DLAYR, DS, DTX, DUL, FILECC, FRRT, !Input
      &    ISWWAT, LL, NLAYR, PG, PLTPOP, RO, RP, RTWT,    !Input
      &    SAT, SW, SWFAC, VSTAGE, WR, WRDOTN, WTNEW,      !Input
@@ -706,7 +717,7 @@ C-----------------------------------------------------------------------
      &    NDSET, NR1, NR2, NR5, NR7, NVEG0, PHTHRS,       !Output
      &    RSTAGE, RVSTGE, STGDOY, SeedFrac, TDUMX,        !Output
      &    TDUMX2, VegFrac, VSTAGE, YREMRG, YRNR1,         !Output
-     &    YRNR2, YRNR3, YRNR5, YRNR7)                     !Output
+     &    YRNR2, YRNR3, YRNR5, YRNR7, PLME)               !Output
       ENDIF
 
 !----------------------------------------------------------------------
@@ -754,7 +765,7 @@ C-----------------------------------------------------------------------
      &    NDSET, NR1, NR2, NR5, NR7, NVEG0, PHTHRS,       !Output
      &    RSTAGE, RVSTGE, STGDOY, SeedFrac, TDUMX,        !Output
      &    TDUMX2, VegFrac, VSTAGE, YREMRG, YRNR1,         !Output
-     &    YRNR2, YRNR3, YRNR5, YRNR7)                     !Output
+     &    YRNR2, YRNR3, YRNR5, YRNR7, PLME)                     !Output
 
 !-----------------------------------------------------------------------
       IF (DAS .EQ. NVEG0) THEN
@@ -793,7 +804,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call to root growth and rooting depth routine
 C-----------------------------------------------------------------------
-      CALL ROOTS(EMERG,
+      CALL ROOTS(EMERG, Control,
      &    AGRRT, CROP, DLAYR, DS, DTX, DUL, FILECC, FRRT, !Input
      &    ISWWAT, LL, NLAYR, PG, PLTPOP, RO, RP, RTWT,    !Input
      &    SAT, SW, SWFAC, VSTAGE, WR, WRDOTN, WTNEW,      !Input
@@ -833,7 +844,7 @@ C-----------------------------------------------------------------------
      &    TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)         !Output
 
 !-----------------------------------------------------------------------
-        CALL VEGGR(EMERG, 
+        CALL VEGGR(EMERG, PLME,
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -1144,7 +1155,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call routine to compute actual vegetative growth, C to mine or add
 C-----------------------------------------------------------------------
-      CALL VEGGR(INTEGR, 
+      CALL VEGGR(INTEGR, PLME,
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -1188,7 +1199,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call to root growth and rooting depth routine
 !-----------------------------------------------------------------------
-      CALL ROOTS(INTEGR,
+      CALL ROOTS(INTEGR, Control,
      &    AGRRT, CROP, DLAYR, DS, DTX, DUL, FILECC, FRRT, !Input
      &    ISWWAT, LL, NLAYR, PG, PLTPOP, RO, RP, RTWT,    !Input
      &    SAT, SW, SWFAC, VSTAGE, WR, WRDOTN, WTNEW,      !Input
@@ -1375,7 +1386,7 @@ C-----------------------------------------------------------------------
       Call PUT('PLANT', 'XPOD',   XPOD)
 
       RETURN
-      END SUBROUTINE CROPGRO
+      END SUBROUTINE TREEGRO
 !=======================================================================
 
 !***********************************************************************
