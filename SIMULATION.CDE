@@ -191,7 +191,7 @@ MLCER    ML   CERES-Millet
 MZCER    MZ   CERES-Maize
 MZIXM    MZ   IXIM-Maize
 PTSUB    PT   SUBSTOR-Potato
-RICER    RI   CERES-Rice
+RICER    RI   CERES-Rice						
 SCCAN    SC   CANEGRO-Sugarcane
 SCCSP    SC   CASUPRO-Sugarcane
 SCSAM    SC   SAMUCA-Sugarcane
@@ -209,4 +209,4 @@ PRFRM    BH   FORAGE-Bahiagrass
 PRFRM    AL   FORAGE-Alfalfa
 PRFRM    GG   FORAGE-Guinea grass
 SUOIL    SU   OILCROP-Sunflower
-
+TRGRO    CT   Citrus
