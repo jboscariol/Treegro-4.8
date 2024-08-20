@@ -39,7 +39,7 @@ C-----------------------------------------------------------------------
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
       IMPLICIT NONE
-      EXTERNAL FIND, ERROR, STNAMES, OPVIEW, READA_Dates, 
+      EXTERNAL FIND, ERROR, TG_STNAMES, OPVIEW, READA_Dates, 
      &  CHANGE_DESC, GetDesc, SUMVALS, EvaluateDat, TIMDIF, READA_Y4K
       SAVE
 
@@ -191,7 +191,7 @@ C-----------------------------------------------------------------------
       CLOSE (LUNIO)
 
 !     Assign names to stages based on crop.
-      CALL STNAMES(CROP, PLME, STNAME)
+      CALL TG_STNAMES(CROP, PLME, STNAME)
       
 !     Assign descriptions to Measured and Simulated data 
 !         from DATA.CDE.
@@ -625,7 +625,7 @@ C=======================================================================
 
 
 C=======================================================================
-C  STNAMES, Subroutine C.H.Porter
+C  TG_STNAMES, Subroutine C.H.Porter
 C  Assigns STNAME for various CROPGRO crops.
 C-----------------------------------------------------------------------
 C  REVISION HISTORY
@@ -633,7 +633,7 @@ C  02/01/2001 CHP Written
 C  08/28/2020 GH Added quinoa
 C=======================================================================
 
-      SUBROUTINE STNAMES(CROP, PLME, STNAME)
+      SUBROUTINE TG_STNAMES(CROP, PLME, STNAME)
 
 C-----------------------------------------------------------------------
       IMPLICIT NONE
@@ -793,6 +793,6 @@ C-----------------------------------------------------------------------
       ENDIF
 
       RETURN
-      END SUBROUTINE STNAMES
+      END SUBROUTINE TG_STNAMES
 C=======================================================================
 

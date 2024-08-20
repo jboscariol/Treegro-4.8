@@ -20,7 +20,7 @@ C  Called : VEGGR
 C  Calls  : ERROR, FIND, IGNORE
 C========================================================================
 
-      SUBROUTINE CANOPY(DYNAMIC,CONTROL,PLME, 
+      SUBROUTINE TG_CANOPY(DYNAMIC,CONTROL,PLME, 
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI, NSTRES,     !Input
      &    CANHT, CANWH)                                   !Output

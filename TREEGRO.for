@@ -351,7 +351,7 @@ C-----------------------------------------------------------------------
         ENDIF
 
 !-----------------------------------------------------------------------
-        CALL TG_VEGGR (RUNINIT, 
+        CALL TG_VEGGR (RUNINIT, PLME,
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -620,7 +620,7 @@ C     Initialize pest coupling point and damage variables
      &    TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)         !Output
 
 !-----------------------------------------------------------------------
-      CALL TG_VEGGR (SEASINIT, 
+      CALL TG_VEGGR (SEASINIT, PLME, 
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input

@@ -24,7 +24,7 @@ C  04/01/2021 VSH/AH Added MultiHarvest code changes.
 !  06/15/2022 CHP Added CropStatus
 C-----------------------------------------------------------------------
 C  Called by:  PLANT
-C  Calls:      IPGROW, STRESS
+C  Calls:      TG_IPGROW, TG_STRESS
 C              ERROR
 C=======================================================================
       SUBROUTINE TG_GROW(CONTROL, ISWITCH, DYNAMIC, SOILPROP, 
@@ -65,7 +65,7 @@ C=======================================================================
                          ! parameters, hourly weather data.
       
       IMPLICIT NONE
-      EXTERNAL IPGROW, ERROR, STRESS
+      EXTERNAL TG_IPGROW, ERROR, TG_STRESS
       SAVE
 !-----------------------------------------------------------------------
 
@@ -190,7 +190,7 @@ C=======================================================================
 !***********************************************************************
       IF (DYNAMIC == RUNINIT) THEN
 !-----------------------------------------------------------------------
-      CALL IPGROW(
+      CALL TG_IPGROW(
      &  FILEIO, FILECC,  CROP,                                  !Input
      &  ALPHL,  ALPHR,  ALPHS,  ALPHSH,                         !Output
      &  PCARLF, PCARST, PCARRT, PCARSH, PCARSD, PCARNO,         !Output
@@ -1141,7 +1141,7 @@ C-----------------------------------------------------------------------
 C     Terminate growth if stress causes extremely low plant weights
 C-----------------------------------------------------------------------
       IF (TOPWT < 0.00001 .OR. STMWT < 0.00001) THEN
-        CALL STRESS(
+        CALL TG_STRESS(
      &    AGEFAC, DWNOD, IDETO, IHARI, NOUTDO, PODWT,     !Input
      &    RTWT, SDWT, SHELWT, STMWT, TOPWT,               !Input
      &    TOTWT, TURFAC, WTLF, YRDOY, YRPLT,              !Input
@@ -1151,7 +1151,7 @@ C-----------------------------------------------------------------------
 
       IF (IHARI .NE. 'R' .AND. IHARI .NE. 'D') THEN
         IF (RTWT  < 0.00001 .OR. WTLF  < 0.00001) THEN
-          CALL STRESS( 
+          CALL TG_STRESS( 
      &      AGEFAC, DWNOD, IDETO, IHARI, NOUTDO, PODWT,   !Input
      &      RTWT, SDWT, SHELWT, STMWT, TOPWT,             !Input
      &      TOTWT, TURFAC, WTLF, YRDOY, YRPLT,            !Input
@@ -1185,7 +1185,7 @@ C-----------------------------------------------------------------------
 C=======================================================================
 
 C=======================================================================
-C  STRESS, Subroutine, from code in GROW subroutine
+C  TG_STRESS, Subroutine, from code in GROW subroutine
 C-----------------------------------------------------------------------
 C  Plant death due to stress
 C-----------------------------------------------------------------------
@@ -1193,10 +1193,10 @@ C  REVISION        HISTORY
 C  09/18/1998 CHP  Written based on code in GROW subroutine
 !  06/15/2022 CHP Added CropStatus
 !-----------------------------------------------------------------------
-!  Called by:  GROW
+!  Called by:  TG_GROW
 !  Calls:      None
 C=======================================================================
-      SUBROUTINE STRESS(
+      SUBROUTINE TG_STRESS(
      &  AGEFAC, DWNOD, IDETO, IHARI, NOUTDO, PODWT,       !Input
      &  RTWT, SDWT, SHELWT, STMWT, TOPWT,                 !Input
      &  TOTWT, TURFAC, WTLF, YRDOY, YRPLT,                !Input
@@ -1254,23 +1254,23 @@ C-----------------------------------------------------------------------
       ENDIF
 !-----------------------------------------------------------------------
       RETURN
-      END  ! SUBROUTINE STRESS
+      END  ! SUBROUTINE TG_STRESS
 C=======================================================================
 
 C=======================================================================
-C  IPGROW, Subroutine, C. H. Porter
+C  TG_IPGROW, Subroutine, C. H. Porter
 C-----------------------------------------------------------------------
-C  Reads input data for GROW routines.
+C  Reads input data for TG_GROW routines.
 C----------------------------------------------------------------------
 C  REVISION HISTORY
 C  09/15/1998 CHP Written
 C  08/12/2003 CHP Added I/O error checking
 !  11/26/2007 CHP THRESH, SDPRO, SDLIP moved from eco to cul file
 C-----------------------------------------------------------------------
-C  Called : GROW
+C  Called : TG_GROW
 C  Calls  : FIND, ERROR, IGNORE
 C=======================================================================
-      SUBROUTINE IPGROW(
+      SUBROUTINE TG_IPGROW(
      &  FILEIO, FILECC,  CROP,                            !Input
      &  ALPHL,  ALPHR,  ALPHS,  ALPHSH,                   !Output
      &  PCARLF, PCARST, PCARRT, PCARSH, PCARSD, PCARNO,   !Output
@@ -1290,7 +1290,7 @@ C=======================================================================
       CHARACTER*1 PLME, UPCASE
       CHARACTER*2 XPODF, CROP
       CHARACTER*6 ERRKEY
-      PARAMETER (ERRKEY = 'IPGROW')
+      PARAMETER (ERRKEY = 'TG_IPGROW')
       CHARACTER*6 SECTION, ECONO  !, ECOTYP
       CHARACTER*30 FILEIO
       CHARACTER*80 C80
@@ -1502,7 +1502,7 @@ C-GH      READ(LUNIO,'(24X,F6.1,5X,A1,6X,F6.0,12X,F6.0)',IOSTAT=ERR)
       ENDIF
 !-----------------------------------------------------------------------
       RETURN
-      END  ! SUBROUTINE IPGROW
+      END  ! SUBROUTINE TG_IPGROW
 C=======================================================================
 
 !-----------------------------------------------------------------------
@@ -1839,5 +1839,5 @@ C=======================================================================
 ! YRNR1    Day when 50% of plants have at least one flower (YYYYDDD)
 ! YRPLT    Planting date (YYYYDDD)
 C=======================================================================
-!       END SUBROUTINES GROW and IPGROW
+!       END SUBROUTINES TG_GROW and TG_IPGROW
 C=======================================================================

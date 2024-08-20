@@ -19,7 +19,7 @@ C  04/02/2021 GH  Adjust growth rate for small seeded crops
 !                   after first flower NR1TIM
 C-----------------------------------------------------------------------
 C  Called by:  PLANT
-C  Calls:      SDCOMP, IPDMND
+C  Calls:      SDCOMP, TG_IPDMND
 C=======================================================================
 
       SUBROUTINE TG_DEMAND(DYNAMIC, CONTROL,
@@ -42,7 +42,7 @@ C=======================================================================
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
-      EXTERNAL IPDMND, WARNING, ErrorCode, SDCOMP, TABEX, CURV
+      EXTERNAL TG_IPDMND, WARNING, ErrorCode, SDCOMP, TABEX, CURV
       SAVE
 
       CHARACTER*2 CROP
@@ -125,7 +125,7 @@ C=======================================================================
       XFPHT  = 0.0
       XFINT  = 0.0
       
-      CALL IPDMND(
+      CALL TG_IPDMND(
      &  FILECC, FILEGC, FILEIO,                           !Input
      &  CARMIN, FINREF, FNSDT, FRLFF, FRLFMX,             !Output
      &  FRSTMF, LIPOPT, LIPTB, LNGSH, NMOBMX,             !Output
@@ -699,7 +699,7 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !=======================================================================
 
 !=======================================================================
-!  IPDMND, Subroutine, C.H. Porter
+!  TG_IPDMND, Subroutine, C.H. Porter
 !-----------------------------------------------------------------------
 !  Reads input data for DEMAND subroutine
 !-----------------------------------------------------------------------
@@ -709,10 +709,10 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !  11/26/2007 CHP THRESH, SDPRO, SDLIP moved from eco to cul file
 !  05/28/2023  FO Added read XFPHT, XFINT from ecotype file
 !-----------------------------------------------------------------------
-!  Called by:  DEMAND
+!  Called by:  TG_DEMAND
 !  Calls:      FIND, ERROR, IGNORE
 !=======================================================================
-      SUBROUTINE IPDMND(
+      SUBROUTINE TG_IPDMND(
      &  FILECC, FILEGC, FILEIO,                           !Input
      &  CARMIN, FINREF, FNSDT, FRLFF, FRLFMX,             !Output
      &  FRSTMF, LIPOPT, LIPTB, LNGSH, NMOBMX,             !Output
@@ -732,7 +732,7 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !-----------------------------------------------------------------------
       CHARACTER*3   TYPSDT
       CHARACTER*6   ERRKEY
-      PARAMETER (ERRKEY = 'IPDMND')
+      PARAMETER (ERRKEY = 'TG_IPDMND')
       CHARACTER*6   SECTION
       CHARACTER*6   ECOTYP, ECONO
       CHARACTER*30  FILEIO
@@ -1028,11 +1028,11 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !-----------------------------------------------------------------------
       RETURN
 !-----------------------------------------------------------------------
-      END  SUBROUTINE IPDMND
+      END  SUBROUTINE TG_IPDMND
 !=======================================================================
 
 !=======================================================================
-!       Variable definitions for DEMAND and IPDMND
+!       Variable definitions for TG_DEMAND and TG_IPDMND
 !         Updated 25 Feb 2004
 !-----------------------------------------------------------------------
 ! ADDSHL    Today's growth demand for shells of age NPP (g[shell] / m2 / d)
@@ -1377,5 +1377,5 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 ! YY        Used to linearly interpolate the difference in partitioning to 
 !             leaves between stages R1 and NDLEAF 
 !-----------------------------------------------------------------------
-!       END SUBROUTINE DEMAND
+!       END SUBROUTINE TG_DEMAND
 !=======================================================================
