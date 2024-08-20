@@ -27,7 +27,7 @@ C  Calls:     CANOPY
 C             ERROR, FIND, IGNORE
 C========================================================================
 
-      SUBROUTINE TG_VEGGR (DYNAMIC, PLME, 
+      SUBROUTINE TG_VEGGR (DYNAMIC, PLME,
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -99,8 +99,6 @@ C========================================================================
 !     Run Initialization - Called once per simulation
 !***********************************************************************
       IF (DYNAMIC .EQ. RUNINIT) THEN
-      !Add the following if statement by JZW
-      IF (CONTROL % RUN == 1 .OR. INDEX('FPQ',CONTROL%RNMODE) < 0) THEN																   
 !-----------------------------------------------------------------------
 !     Read in values from input file, which were previously input
 !       in Subroutine IPCROP.
@@ -166,7 +164,7 @@ C========================================================================
       CLOSE (LUNCRP)
 
 !-----------------------------------------------------------------------
-!    Call CANOPY for input
+!    Call TG_CANOPY for input
 !-----------------------------------------------------------------------
       CALL TG_CANOPY(RUNINIT, Control, PLME,
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
@@ -218,13 +216,12 @@ C========================================================================
 !     EMERGENCE CALCULATIONS - Performed once per season upon emergence
 !         or transplanting of plants
 !***********************************************************************
-       ELSEIF (DYNAMIC .EQ. EMERG) THEN
+      ELSEIF (DYNAMIC .EQ. EMERG) THEN
 !-----------------------------------------------------------------------
-      IF (CONTROL %RUN == 1 .OR. INDEX('FPQ',CONTROL%RNMODE) < 0) THEN																	  
-        FNINLG = PROLFG * 0.16   
-        FNINRG = PRORTG * 0.16   
-        FNINSG = PROSTG * 0.16   
-        CUMTUR = 1.0             
+      FNINLG = PROLFG * 0.16   
+      FNINRG = PRORTG * 0.16   
+      FNINSG = PROSTG * 0.16   
+      CUMTUR = 1.0             
 
       CALL TG_CANOPY(EMERG, CONTROL, PLME,
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
@@ -481,7 +478,7 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       RETURN
 C-----------------------------------------------------------------------
-      END ! SUBROUTINE VEGGR
+      END ! SUBROUTINE TG_VEGGR
 C-----------------------------------------------------------------------
 ! AGRLF   Mass of CH2O required for new leaf growth (g[CH2O] / g[leaf])
 ! AGRRT   Mass of CH2O required for new root growth (g[CH2O] / g[root])

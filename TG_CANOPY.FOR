@@ -32,6 +32,7 @@ C-----------------------------------------------------------------------
       EXTERNAL GETLUN, FIND, ERROR, IGNORE, TABEX
       SAVE
 
+      CHARACTER*1 PLME					  
       CHARACTER*6 ERRKEY
       PARAMETER (ERRKEY = 'TG_CANOPY')
 

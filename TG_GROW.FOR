@@ -245,16 +245,16 @@ C-----------------------------------------------------------------------
       IF (CONTROL%RUN .EQ. 1 .OR. INDEX('QPF',CONTROL%RNMODE).LE.0) THEN																																 									 
         AREALF = 0.0						   
         AREAH  = 0.0													  
-		PCNL   = 0.0
+        PCNL   = 0.0
         PCNRT  = 0.0
-     !   PCNSD  = 0.0
-     !   PCNSH  = 0.0
+!        PCNSD  = 0.0
+!        PCNSH  = 0.0
         PCNST  = 0.0
         RHOL   = 0.0
         RHOR   = 0.0
         RHOS   = 0.0																	 	
-		RTWT   = 0.0														 
-		SLAAD  = 0.0							  
+        RTWT   = 0.0														 
+        SLAAD  = 0.0							  
         STMWT  = 0.0        
 		
         WCRLF  = 0.0
@@ -265,11 +265,11 @@ C-----------------------------------------------------------------------
         WTLF   = 0.0
         WTMAIN = 0.0		
         WTNCAN = 0.0
-		WTNLF  = 0.0
-		WTNNOD = 0.0
-		WTNRT  = 0.0
-		WTNSD  = 0.0
-		ShutMob = 0.0
+        WTNLF  = 0.0
+        WTNNOD = 0.0
+        WTNRT  = 0.0
+        WTNSD  = 0.0
+        ShutMob = 0.0
 		
         RootMob = 0.0																		 
         SDPDOT = 0.0    !CHP - not used
@@ -278,7 +278,7 @@ C-----------------------------------------------------------------------
         NLPEST = 0.0    !CHP - N loss due to pest damage	
       ENDIF		
         ALFDOT = 0.0
-		CANWAA = 0.0											   
+        CANWAA = 0.0											   
         CANNAA = 0.0
         GROWTH = 0.0
         GRWRES = 0.0
@@ -294,7 +294,7 @@ C-----------------------------------------------------------------------
 !        PCNSD  = 0.0  !Percentage of N in seed tissue
 !        PCNSH  = 0.0  !Percentage of N in shell tissue								 												  
         PODWT  = 0.0		
-		RHOSH  = 0.0																				   																						  
+        RHOSH  = 0.0																				   																						  
         SDRATE = 0.0
         SDWT   = 0.0
         SDWTAM = 0.0
@@ -310,13 +310,13 @@ C-----------------------------------------------------------------------
         SENESCE % ResLig = 0.0
         SENESCE % ResE   = 0.0
         SENESCE % CumResE(N) = 0.0
-	    SHELWT = 0.0
-		WCRSH  = 0.0
-		WNRSH  = 0.0
+        SHELWT = 0.0
+        WCRSH  = 0.0
+        WNRSH  = 0.0
         WNRST  = 0.0
-		WSDDOT = 0.0
-		WSHDOT = 0.0
-		WTCO   = 0.0
+        WSDDOT = 0.0
+        WSHDOT = 0.0
+        WTCO   = 0.0
         WTCSD  = 0.0
         WTLO   = 0.0
         WTLSD  = 0.0
@@ -337,9 +337,9 @@ C-----------------------------------------------------------------------
         WTNSHO = 0.0
         WTNSO  = 0.0
         IF (CONTROL%RUN.EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE.0) THEN      
-	      WTNST  = 0.0
+          WTNST  = 0.0
           WTNTOT = 0.0
-		Endif
+        Endif
 		
         WTNUP  = 0.0
         WTRO   = 0.0
@@ -348,7 +348,7 @@ C-----------------------------------------------------------------------
         WTSO   = 0.0
         IF (CONTROL%RUN.EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE.0) THEN     
 	    XLAI   = 0.0
-        XHLAI  = 0.0
+          XHLAI  = 0.0
         endif  
         XPOD   = 0.0
         if (CONTROL%RUN .EQ.1 .OR.INDEX('QPF',CONTROL%RNMODE).LE.0) then
@@ -369,7 +369,7 @@ C-----------------------------------------------------------------------
 ! CHP 09/17/03 Do this for output only - SLA is used in calculations!
         IF (CONTROL%RUN.EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE.0) THEN																		
           SLA = 0.0
-		endif	  
+        endif	  
 !     Need to get initial value of F from DEMAND first  chp 9/14/98
 !      IF (CROP .NE. 'FA') THEN
 !        SLA    = F                 

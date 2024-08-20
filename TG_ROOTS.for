@@ -42,7 +42,7 @@ C-----------------------------------------------------------------------
                          ! parameters, hourly weather data.
       USE Interface_Read_IFile							  
       IMPLICIT NONE
-      EXTERNAL IPROOT, INROOT, TABEX
+      EXTERNAL TG_IPROOT, TG_INROOT, TABEX
       SAVE
 
       CHARACTER*1 ISWWAT, PLME
@@ -86,7 +86,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
       !Add the following if statement by JZW
       IF (CONTROL %RUN == 1 .OR. INDEX('FPQ',CONTROL%RNMODE) < 0) THEN																	  
-        CALL IPROOT(FILECC,                                 !Input
+        CALL TG_IPROOT(FILECC,                                 !Input
      &    PORMIN, RFAC1, RLDSM, RTDEPI, RTEXF,              !Output
      &    RTSEN, RTSDF, RTWTMIN, XRTFAC, YRTFAC)            !Output
 
@@ -100,7 +100,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
       IF (CONTROL%RUN .EQ.1 .OR. INDEX('QPF',CONTROL%RNMODE).LE. 0) THEN
         SRDOT = 0.0 !Daily root senescence (g / m2 / d)     
-        RLV   = 0.0 !Root length density for soil layer L (cm[root] / cm3[soil])
+        RLV   = 0.0 !Root length density for soil layer L (cm[root]/cm3[soil])
         RTDEP = 0.0 !Root depth (cm)   
         SENRT = 0.0 !Daily senesced matter from roots in soil layer L
         SUMEX = 0.0 !Sum over all layers of water excess factor times depth
@@ -476,7 +476,7 @@ C=======================================================================
 !=======================================================================
 
 C=======================================================================
-C  INROOT Subroutine
+C  TG_INROOT Subroutine
 C  Initializes root variables at emergence.
 C----------------------------------------------------------------------
 C  REVISION HISTORY
@@ -484,10 +484,10 @@ C  04/01/91 GH  Adapted for CROPGRO
 C  06/17/98 CHP Modified for modular format
 C  05/11/99 GH  Incorporated in CROPGRO
 C-----------------------------------------------------------------------
-C  Called : CROPGRO
+C  Called : TREEGRO
 C  Calls  : None
 C=======================================================================
-      SUBROUTINE INROOT(
+      SUBROUTINE TG_INROOT(
      &  DLAYR, FRRT, NLAYR, PLTPOP, RFAC1, RTDEPI, WTNEW, !Input
      &  RLV, RTDEP)                                       !Output
 
