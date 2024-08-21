@@ -114,7 +114,7 @@ C-----------------------------------------------------------------------
 !     USE Cells_2D
 
       IMPLICIT NONE
-      EXTERNAL ALOHA_PINEAPPLE,BS_CERES,CROPGRO,CSCAS_INTERFACE,
+      EXTERNAL ALOHA_PINEAPPLE,BS_CERES,CROPGRO,TREEGRO,CSCAS_INTERFACE,
      &  CSCERES_INTERFACE,CSCRP_INTERFACE,CSP_CASUPRO,CSYCA_INTERFACE,
      &  FIND,FORAGE,GETLUN,ML_CERES,MZ_CERES,PT_SUBSTOR,READ_ASCE_KT,
      &  RICE,SAMUCA,SC_CNGRO,SG_CERES,SU_CERES,SUMVALS,TEFF,TF_APSIM,
@@ -441,7 +441,8 @@ C         Variables to run CASUPRO from Alt_PLANT.  FSR 07-23-03
      &    CANHT, CropStatus, EORATIO, HARVRES, KSEVAP,    !Output
      &    KTRANS, MDATE, NSTRES, PSTRES1,                 !Output
      &    PUptake, PORMIN, RLV, RWUMX, SENESCE,           !Output
-     &    STGDOY, FracRts, UNH4, UNO3, XHLAI, XLAI)       !Output								
+     &    STGDOY, FracRts, UNH4, UNO3, XHLAI, XLAI)       !Output
+!     -------------------------------------------------	 
 !     Wheat and Barley CSCER
       CASE('CSCER')
         CALL CSCERES_Interface (CONTROL, ISWITCH,          !Input
@@ -457,7 +458,7 @@ C         Variables to run CASUPRO from Alt_PLANT.  FSR 07-23-03
         ELSEIF (DYNAMIC .EQ. INTEGR) THEN
           XHLAI = XLAI
         ENDIF
-
+		
 !     -------------------------------------------------
 !     Wheat and Barley CSCRP
       CASE('CSCRP')
